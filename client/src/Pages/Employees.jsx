@@ -1,5 +1,5 @@
 import ReactPaginate from 'react-paginate';
-
+import { ToastContainer,toast,Bounce } from "react-toastify";
 import { useEffect, useState,useRef } from "react";
 import axios from "axios";
 
@@ -27,9 +27,52 @@ function changeLimit(){
     console.log(`Edit employee with ID ${employeeId}`);
   };
 
-  const handleDelete = (employeeId) => {
-   
-    console.log(`Delete employee with ID ${employeeId}`);
+  const handleDelete = async (employeeId) => {
+    try {
+      if (employeeId === undefined) {
+        console.error('Employee ID is undefined');
+        return;
+      }
+      
+      const response = await axios.delete(`http://localhost:3000/employeelist/${employeeId}`)
+      if (response.status === 200) {
+        toast.info(response.data.message, {
+          position: "top-center",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+          transition: Bounce,
+        });
+        } else {
+          toast.error("Failed to delete employee", {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            transition: Bounce,
+          });
+      }
+    } catch (error) {
+      toast.error("Error deleting employee", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+        transition: Bounce,
+      });
+    }
   };
   function getPaginatedUsers() {
     axios.get(`http://localhost:3000/employeelist?page=${currentpage.current}&limit=${limit}`)
@@ -67,8 +110,9 @@ function changeLimit(){
           </thead>
           <tbody> 
             {data.map((i) => (
-              <tr key={i.id}>
-                <td className="py-2">{i.id}</td>
+              <tr key={i.empId}>
+                {i.id}
+                <td className="py-2">{i.empId}</td>
                 <td className="py-2">{i.name}</td>
                 <td className="py-2">{i.age}</td>
                 <td className="py-2">{i.dept}</td>
@@ -78,12 +122,13 @@ function changeLimit(){
                 <td className="py-2">
                   <button
                     onClick={() => handleEdit(i.id)}
+                  
                     className="bg-blue-500 text-white px-2 py-1 rounded-md mr-2"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(i.id)}
+                    onClick={() => handleDelete(i.empId)}
                     className="bg-red-500 text-white px-2 py-1 rounded-md"
                   >
                     Delete
@@ -111,9 +156,32 @@ function changeLimit(){
   nextClassName="px-3 py-2 border rounded hover:bg-orange-300"
   nextLinkClassName="text-black-500"
   activeClassName="bg-orange-500 text-white"
-/><input placeholder="Limit" onChange={e=>setLimit(e.target.value)}/>
-<button onClick={changeLimit}>Change limit</button>
+/><input
+    className="px-3 py-2 border rounded mt-4"
+    type="text"
+    placeholder="Limit"
+    onChange={(e) => setLimit(e.target.value)}
+  />
+  <button
+    className="px-3 py-2 bg-orange-500 text-white rounded mt-2"
+    onClick={changeLimit}
+  >
+    Change limit
+  </button>
       </section>
+        <ToastContainer
+  position="top-center"
+  autoClose={5000}
+  hideProgressBar={false}
+  newestOnTop={false}
+  closeOnClick
+  rtl={false}
+  pauseOnFocusLoss
+  draggable
+  pauseOnHover
+  theme="colored"
+  transition={Bounce}  
+/>
     </>
   );
 };
